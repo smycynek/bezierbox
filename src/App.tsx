@@ -7,6 +7,7 @@ import { Logger, LoggerLevel } from './Logger';
 import { getMousePos, getTouchPos, near } from './utility';
 import { Constants } from './constants';
 import { createSplineBezierManualArray } from './bezier';
+import { Vector } from './Vector';
 
 interface DrawConfig {
   color: Color;
@@ -22,7 +23,7 @@ const App: Component = () => {
   let context: CanvasRenderingContext2D;
   const [normalControlEnabled] = createSignal(false);
   const [showNormals, setShowNormals] = createSignal(false);
-  const [setHeight] = createSignal(0);
+  const [, setHeight] = createSignal(0);
 
   const [pointIndex, setPointIndex] = createSignal(-1);
 
@@ -134,7 +135,8 @@ const App: Component = () => {
     drawCurvePointCartSegments(points(), config);
 
     // actual curve
-    drawCurvePointCartSegments(spline, getDrawConfig(Color.red, 2.0));
+    drawCurvePointCartSegments(spline[0], getDrawConfig(Color.red, 2.0));
+    drawNormals(spline[0], spline[1], getDrawConfig(Color.blue, 1.0));
 
     // control points
     points().forEach((p: Point) => {
@@ -190,16 +192,8 @@ const App: Component = () => {
     } else {
       context.setLineDash([]);
     }
-    context.beginPath();
-    context.moveTo(
-      (p1.x + config.offset.x) * config.scale + config.canvas.width / 2 + config.offset.x,
-      (-p1.y - config.offset.y) * config.scale + config.canvas.height / 2 + config.offset.y
-    );
-    context.lineTo(
-      (p2.x + config.offset.x) * config.scale + config.canvas.width / 2 + config.offset.x,
-      (-p2.y - config.offset.y) * config.scale + config.canvas.height / 2 + config.offset.y
-    );
-    context.stroke();
+
+    drawSingleLine(context, p1, p2, config);
   };
 
   const cartesianAdjust = (pt: Point): Point => {
@@ -361,3 +355,45 @@ const App: Component = () => {
 };
 
 export default App;
+
+function drawNormals(points: Point[], slopes: number[], config: DrawConfig) {
+  const ctx = config.canvas.getContext('2d');
+  if (!ctx || points.length < 2) {
+    return;
+  }
+
+  const tangentLength = 1; // length of the tangent line segments
+  ctx.strokeStyle = config.color;
+  ctx.lineWidth = config.width;
+  ctx.setLineDash([]);
+
+  for (let idx = 0; idx < points.length; idx += 5) {
+    const point = points[idx];
+    const slope = slopes[Math.min(idx, slopes.length - 1)] ?? 0;
+    const start = point;
+    const offset = new Vector(1, slope) as Vector;
+    const normal = offset.cross(new Vector(0, 0, 1)); // cross to get normal vector in 2D
+    const scaledNormal = normal.normalize().scale(tangentLength);
+    const end = start.add(scaledNormal) as Point;
+
+    drawSingleLine(ctx, start, end, config);
+  }
+}
+
+function drawSingleLine(
+  ctx: CanvasRenderingContext2D,
+  start: Point,
+  end: Point,
+  config: DrawConfig
+) {
+  ctx.beginPath();
+  ctx.moveTo(
+    (start.x + config.offset.x) * config.scale + config.canvas.width / 2 + config.offset.x,
+    (-start.y - config.offset.y) * config.scale + config.canvas.height / 2 + config.offset.y
+  );
+  ctx.lineTo(
+    (end.x + config.offset.x) * config.scale + config.canvas.width / 2 + config.offset.x,
+    (-end.y - config.offset.y) * config.scale + config.canvas.height / 2 + config.offset.y
+  );
+  ctx.stroke();
+}

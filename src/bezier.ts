@@ -43,7 +43,7 @@ function factorial(n: number): number {
 }
 const memFactorial = memoize(factorial);
 
-export function createSplineBezierManualArray(points: Point[]): Point[] {
+export function createSplineBezierManualArray(points: Point[]): [Point[], number[], number[]] {
   const evaluateAtT = (t: number): Point => {
     // t is the parameter from 0 to 1, sampled at small increments.
     const degree = points.length - 1;
@@ -71,6 +71,14 @@ export function createSplineBezierManualArray(points: Point[]): Point[] {
   for (let t = 0; t <= 1; t += 0.01) {
     bezierPoints.push(evaluateAtT(t));
   }
+  const slopes: number[] = [];
+  for (let idx = 0; idx < bezierPoints.length - 1; idx++) {
+    const p1 = bezierPoints[idx];
+    const p2 = bezierPoints[idx + 1];
 
-  return bezierPoints;
+    const m = (p2.y - p1.y) / (p2.x - p1.x);
+    slopes.push(m);
+  }
+
+  return [bezierPoints, slopes, []];
 }
