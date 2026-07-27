@@ -9,4 +9,5 @@ export enum Color {
   purple = 'rgb(128,0,128)',
   darkgreen = 'rgb(0,100,0)',
   darkred = 'rgb(139,0,0)',
+  transparent = 'rgba(0,0,0,0)',
 }

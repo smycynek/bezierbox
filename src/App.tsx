@@ -127,16 +127,6 @@ const App: Component = () => {
 
     const spline = createSplineBezierManualArray(points());
 
-    // control points
-    points().forEach((p: Point) => {
-      drawPoint(
-        canvas.width / 2 + p.x * Constants.scale,
-        canvas.height / 2 - p.y * Constants.scale,
-        Color.black,
-        3
-      );
-    });
-
     const config = getDrawConfig(Color.black, 1.0);
     config.solid = false;
 
@@ -145,10 +135,22 @@ const App: Component = () => {
 
     // actual curve
     drawCurvePointCartSegments(spline, getDrawConfig(Color.red, 2.0));
+
+    // control points
+    points().forEach((p: Point) => {
+      drawPoint(
+        canvas.width / 2 + p.x * Constants.scale,
+        canvas.height / 2 - p.y * Constants.scale,
+        points().length < 4 ? Color.black : Color.blue,
+        true,
+        5,
+        2
+      );
+    });
   };
 
   const drawGridPoint = (x: number, y: number) => {
-    drawPoint(x, y, Color.black, 0.25);
+    drawPoint(x, y, Color.black, true, 0.25);
   };
 
   const drawCurvePointCartSegments = (points: Point[], config: DrawConfig) => {
@@ -161,14 +163,16 @@ const App: Component = () => {
     x: number, // note, screen coords
     y: number,
     color: Color,
-    radius: number = 2
+    transparent: boolean = false,
+    radius: number = 2,
+    lineWidth: number = 1
   ) => {
     if (!canvas) {
       init();
     }
     context.strokeStyle = color;
-    context.fillStyle = color;
-    context.lineWidth = 1;
+    context.fillStyle = transparent ? Color.transparent : color;
+    context.lineWidth = lineWidth;
     context.beginPath();
     context.arc(x, y, radius, 0, 2 * Math.PI);
     context.fill();
@@ -243,7 +247,7 @@ const App: Component = () => {
     for (let ii = 0; ii < points().length; ii++) {
       if (near(pt, points()[ii])) {
         addNewPoint = false;
-        if (points().length <= 4) {
+        if (points().length <= 3) {
           break;
         }
         const current = points();
@@ -308,7 +312,7 @@ const App: Component = () => {
         </h1>
         <p>
           Hours of Fun. Drag points. Double-click/tap to add a point. Double-click/tap a point to
-          remove it.
+          remove it (minimum 3 points){' '}
         </p>
       </header>
       <header class={styles.header}>

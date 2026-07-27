@@ -39,40 +39,37 @@ function factorial(n: number): number {
   if (n === 0 || n === 1) {
     return 1;
   }
-  let result = 1;
-  for (let i = 2; i <= n; i++) {
-    result *= i;
-  }
-  return result;
+  return factorial(n - 1) * n;
 }
-
 const memFactorial = memoize(factorial);
 
 export function createSplineBezierManualArray(points: Point[]): Point[] {
-  const xParam = (t: number) => {
+  const evaluateAtT = (t: number): Point => {
+    // t is the parameter from 0 to 1, sampled at small increments.
     const degree = points.length - 1;
     let x = 0;
-    for (let i = 0; i <= degree; i++) {
-      // 1 3 3 1 for 4 point cubic
-      const coefficent = memFactorial(degree) / (memFactorial(i) * memFactorial(degree - i));
-      x += coefficent * Math.pow(1 - t, degree - i) * Math.pow(t, i) * points[i].x;
-    }
-    return x;
-  };
-
-  const yParam = (t: number) => {
-    const degree = points.length - 1;
     let y = 0;
-    for (let i = 0; i <= degree; i++) {
-      const coefficent = factorial(degree) / (factorial(i) * factorial(degree - i));
-      y += coefficent * Math.pow(1 - t, degree - i) * Math.pow(t, i) * points[i].y;
+    for (let currentDegree = 0; currentDegree <= degree; currentDegree++) {
+      // 1 3 3 1 for 4 point cubic
+      const coefficent =
+        memFactorial(degree) / (memFactorial(currentDegree) * memFactorial(degree - currentDegree));
+      x +=
+        coefficent *
+        Math.pow(1 - t, degree - currentDegree) *
+        Math.pow(t, currentDegree) *
+        points[currentDegree].x;
+      y +=
+        coefficent *
+        Math.pow(1 - t, degree - currentDegree) *
+        Math.pow(t, currentDegree) *
+        points[currentDegree].y;
     }
-    return y;
+    return new Point(x, y);
   };
 
   const bezierPoints: Point[] = [];
   for (let t = 0; t <= 1; t += 0.01) {
-    bezierPoints.push(new Point(xParam(t), yParam(t)));
+    bezierPoints.push(evaluateAtT(t));
   }
 
   return bezierPoints;
