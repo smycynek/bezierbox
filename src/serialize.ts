@@ -8,6 +8,7 @@ export async function compressToBase64(text: string): Promise<string> {
   writer.write(byteArray);
   writer.close();
   const compressedBuffer = await new Response(stream.readable).arrayBuffer();
+  Logger.info('CompressToBase64');
   return btoa(String.fromCharCode(...new Uint8Array(compressedBuffer)));
 }
 
@@ -18,6 +19,7 @@ export async function base64ToUncompressed(text: string): Promise<string> {
   writer.write(compressedBytes);
   writer.close();
   const decompressedBuffer = await new Response(stream.readable).arrayBuffer();
+  Logger.info('base64Uncompress');
   return new TextDecoder().decode(decompressedBuffer);
 }
 
@@ -41,6 +43,7 @@ export async function saveData(points: Point[]) {
   const bData = await compressToBase64(data);
   try {
     localStorage.setItem(localStorageKey, bData);
+    Logger.info('Save to local storage');
   } catch (e) {
     Logger.info('Cannot save data ' + e);
   }
@@ -51,10 +54,12 @@ export async function loadDataFromQueryString(queryString: string): Promise<Poin
   if (!sData) {
     return [];
   }
+  Logger.info(`Query string: ${queryString}`);
   const uncompressed = await base64ToUncompressed(sData);
   return getPointsFromJSON(uncompressed);
 }
 export async function saveDataToQueryString(points: Point[]): Promise<string> {
+  Logger.info('Get compressed data');
   return compressToBase64(getDataAsJSON(points));
 }
 
@@ -65,6 +70,7 @@ export async function loadData(): Promise<Point[]> {
       return [];
     }
     const uncompressed = await base64ToUncompressed(sData);
+    Logger.info('Load data');
     return getPointsFromJSON(uncompressed);
   } catch (e) {
     Logger.info('Cannot load data ' + e);

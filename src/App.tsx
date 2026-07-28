@@ -187,26 +187,28 @@ const App: Component = () => {
         if (points().length <= 3) {
           break;
         }
-        const current = points();
-        current.splice(ii, 1);
-        setPoints(current);
-        saveData(points());
+        removePointHandler(ii);
         break;
       }
     }
-
     if (addNewPoint) {
       addPointHandler(pt);
-      saveData(points());
     }
     drawSplines();
+  };
+
+  const removePointHandler = (index: number) => {
+    const current = points();
+    current.splice(index, 1);
+    setPoints(current);
+    saveData(points());
   };
 
   const addPointHandler = (pt: Point) => {
     const newPoints = [...points()];
     newPoints.push(pt);
     setPoints(newPoints);
-    drawSplines();
+    saveData(points());
   };
 
   const mouseUpHandler = async () => {
@@ -218,6 +220,7 @@ const App: Component = () => {
   };
 
   const mouseDownHandler = (data: MouseEvent) => {
+    Logger.info('Mouse down');
     const pos = getMousePos(getCanvas(), data);
     pointIndexAdjust(pos);
   };
@@ -265,7 +268,6 @@ const App: Component = () => {
         <canvas
           onMouseDown={mouseDownHandler}
           onMouseMove={mouseMoveHandler}
-          onMouseUp={mouseUpHandler}
           onTouchStart={touchStartHandler}
           onTouchEnd={touchEndHandler}
           onTouchMove={touchMoveHandler}
