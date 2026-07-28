@@ -227,8 +227,11 @@ const App: Component = () => {
     moveHandler(pt);
   };
 
-  const touchEndHandler = () => {
+  const touchEndHandler = async () => {
     setPointIndex(-1);
+    saveData(points());
+    const url = await getTextUrl();
+    setTextLink(url);
   };
 
   const touchStartHandler = (data: TouchEvent) => {

@@ -34,11 +34,13 @@ function getPointsFromJSON(data: string): Point[] {
   return points;
 }
 
+const localStorageKey = 'pointData_v10';
+
 export async function saveData(points: Point[]) {
   const data = getDataAsJSON(points);
   const bData = await compressToBase64(data);
   try {
-    localStorage.setItem('pointData', bData);
+    localStorage.setItem(localStorageKey, bData);
   } catch (e) {
     Logger.info('Cannot save data ' + e);
   }
@@ -58,7 +60,7 @@ export async function saveDataToQueryString(points: Point[]): Promise<string> {
 
 export async function loadData(): Promise<Point[]> {
   try {
-    const sData = localStorage.getItem('pointData');
+    const sData = localStorage.getItem(localStorageKey);
     if (!sData) {
       return [];
     }
