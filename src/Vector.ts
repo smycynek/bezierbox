@@ -17,12 +17,6 @@ export class Vector extends Triple {
     >`;
   }
 
-  private type: string = 'Vector';
-
-  public getType(): string {
-    return this.type;
-  }
-
   public static fromTriple(triple: Triple): Vector {
     return new Vector(triple.x, triple.y, triple.z);
   }

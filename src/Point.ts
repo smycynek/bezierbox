@@ -16,11 +16,6 @@ export class Point extends Triple {
     ${formatter.format(round2(this.y)).padStart(6, '0')} 
     )`;
   }
-  private type: string = 'Point';
-
-  public getType(): string {
-    return this.type;
-  }
 
   public distanceTo(other: Triple): number {
     const dx = this.x - other.x;

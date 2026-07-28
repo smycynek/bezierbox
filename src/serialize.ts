@@ -12,6 +12,7 @@ function JSONtoBase64(pointJson: string): string {
 function Base64ToJson(base64: string): string {
   return atob(base64);
 }
+
 function getPointsFromJSON(data: string): Point[] {
   const ptObj: Point[] = JSON.parse(data);
   const points: Point[] = [];
