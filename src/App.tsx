@@ -23,6 +23,7 @@ import {
   saveData,
   saveDataToQueryString,
 } from './serialize';
+import { version } from './version';
 
 const App: Component = () => {
   const [normalControlEnabled] = createSignal(false);
@@ -70,6 +71,7 @@ const App: Component = () => {
       } else {
         Logger.info('Initial values');
       }
+      setTextLink(await getTextUrl());
     }
 
     resizeCanvas();
@@ -305,6 +307,7 @@ const App: Component = () => {
               https://github.com/smycynek/bezierbox
             </a>
           </div>
+          <div class="label cite">v {version}</div>
         </div>
       </header>
     </div>
