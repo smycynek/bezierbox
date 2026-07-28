@@ -6,7 +6,7 @@ import { Logger, LoggerLevel } from './Logger';
 
 import { getMousePos, getTouchPos, near } from './utility';
 import { Constants } from './constants';
-import { createSplineBezierManualArray } from './bezier';
+import { createSplineBezierManualArray, createSplineBezierMultiQuad } from './bezier';
 import { loadData, saveData } from './serialize';
 
 interface DrawConfig {
@@ -130,7 +130,7 @@ const App: Component = () => {
     ctx?.clearRect(0, 0, canvas.width, canvas.height);
     drawGrid();
 
-    const spline = createSplineBezierManualArray(points());
+    const spline = createSplineBezierMultiQuad(points());
 
     const config = getDrawConfig(Color.black, 1.0);
     config.solid = false;
