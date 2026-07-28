@@ -2,7 +2,7 @@ import { createSignal, onMount, Show, type Component } from 'solid-js';
 import styles from './App.module.css';
 import { Point } from './Point';
 import { Color } from './color';
-import { toggleLog } from './Logger';
+import { Logger, toggleLog } from './Logger';
 import {
   cartesianAdjust,
   drawCurvePointCartSegments,
@@ -15,7 +15,14 @@ import {
 import { getMousePos, getTouchPos, near } from './utility';
 import { Constants } from './constants';
 import { createSplineBezierManualArray } from './bezier';
-import { loadData, saveData } from './serialize';
+import {
+  base64ToUncompressed,
+  compressToBase64,
+  loadData,
+  loadDataFromQueryString,
+  saveData,
+  saveDataToQueryString,
+} from './serialize';
 
 const App: Component = () => {
   const [normalControlEnabled] = createSignal(false);
@@ -24,7 +31,7 @@ const App: Component = () => {
   const [height, setHeight] = createSignal(0);
 
   const [pointIndex, setPointIndex] = createSignal(-1);
-
+  const [textLink, setTextLink] = createSignal('https://stevenvictor.net/bezierbox');
   const standardPoints = [
     new Point(-4, -4),
     new Point(-4, 4),
@@ -40,14 +47,29 @@ const App: Component = () => {
 
   const [points, setPoints] = createSignal([...standardPoints]);
 
-  const init = () => {
+  const init = async () => {
+    const initial = 'abc123ALWKENJ';
+    const comp = await compressToBase64(initial);
+    console.log(comp);
+    const rt = await base64ToUncompressed(comp);
+    console.log(rt);
+
     if (getContext()) {
       getContext()?.clearRect(0, 0, getCanvas().width, getCanvas().height);
     }
-
-    const savedPoints = loadData();
-    if (savedPoints.length) {
-      setPoints(savedPoints);
+    const queryString = window.location.search;
+    if (queryString) {
+      console.log(queryString.substring(6));
+      setPoints(await loadDataFromQueryString(queryString));
+      Logger.info('Loaded from URL');
+    } else {
+      const savedPoints = await loadData();
+      if (savedPoints.length) {
+        setPoints(savedPoints);
+        Logger.info('Loaded from local storage');
+      } else {
+        Logger.info('Initial values');
+      }
     }
 
     resizeCanvas();
@@ -133,6 +155,25 @@ const App: Component = () => {
     drawSplines();
   };
 
+  const getTextUrl = async () => {
+    const sData = encodeURIComponent(
+      'https://stevenvictor.net/bezierbox/?data=' + (await saveDataToQueryString(points()))
+    );
+    return `sms:&body=${'Share%20a%20spline%21'}%20${sData}`;
+  };
+
+  const copyButtonHandler = async () => {
+    const sData =
+      'https://stevenvictor.net/bezierbox/?data=' + (await saveDataToQueryString(points()));
+
+    const type = 'text/plain';
+    const clipboardItemData = {
+      [type]: sData,
+    };
+    const clipboardItem = new ClipboardItem(clipboardItemData);
+    navigator.clipboard.write([clipboardItem]);
+  };
+
   const doubleClickHandler = (data: MouseEvent) => {
     const ptOriginal = getMousePos(getCanvas(), data);
     const pt = cartesianAdjust(ptOriginal);
@@ -166,9 +207,12 @@ const App: Component = () => {
     drawSplines();
   };
 
-  const mouseUpHandler = () => {
+  const mouseUpHandler = async () => {
     setPointIndex(-1);
     saveData(points());
+    const url = await getTextUrl();
+    setTextLink(url);
+    console.log(textLink());
   };
 
   const mouseDownHandler = (data: MouseEvent) => {
@@ -205,11 +249,11 @@ const App: Component = () => {
     <div onMouseUp={mouseUpHandler}>
       <header class={styles.header}>
         <h1 title="Toggle Log" onClick={[toggleLog, null]}>
-          Bezier Box
+          Send a Spline!
         </h1>
         <p>
           Hours of Fun. Drag points. Double-click/tap to add a point. Double-click/tap a point to
-          remove it (minimum 3 points).
+          remove it (minimum 3 points). Text design to your friends!
         </p>
       </header>
       <header class={styles.header}>
@@ -241,6 +285,16 @@ const App: Component = () => {
             <button onClick={resetButtonHandler} class="actionButtonWide">
               Reset
             </button>
+          </div>
+          <div class="label">
+            <button onClick={copyButtonHandler} class="actionButtonWide">
+              Copy URL
+            </button>
+          </div>
+          <div class="label">
+            <a href={textLink()} target="_blank" rel="noopener noreferrer">
+              Send to a friend (beta)
+            </a>
           </div>
           <div class="label cite">
             <a

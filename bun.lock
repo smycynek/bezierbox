@@ -9,6 +9,7 @@
         "install": "^0.13.0",
         "memoize": "^11.0.0",
         "solid-js": "^1.9.5",
+        "text-compress": "^2.0.6",
       },
       "devDependencies": {
         "@types/node": "^25.6.2",
@@ -971,6 +972,8 @@
     "tempy": ["tempy@0.6.0", "", { "dependencies": { "is-stream": "^2.0.0", "temp-dir": "^2.0.0", "type-fest": "^0.16.0", "unique-string": "^2.0.0" } }, "sha512-G13vtMYPT/J8A4X2SjdtBTphZlrp1gKv6hZiOjw14RCWg6GbHuQBGtjlx75xLbYV/wEc0D7G5K4rxKP/cXk8Bw=="],
 
     "terser": ["terser@5.49.0", "", { "dependencies": { "@jridgewell/source-map": "^0.3.3", "acorn": "^8.15.0", "commander": "^2.20.0", "source-map-support": "~0.5.20" }, "bin": { "terser": "bin/terser" } }, "sha512-SNiDnXyHSrxVcIOtVbULzcTmniUiwcV7Nwdyj1twVubeTmbjoa8p69KKDpfkdoOavuM4/GRm1+ykI8qqnavHoA=="],
+
+    "text-compress": ["text-compress@2.0.6", "", { "dependencies": { "ignore": "^7.0.5" }, "bin": { "text-compress": "dist/cli.js" } }, "sha512-3fYrlJMHzsBOrBBfgPFPq2ng7sXAt5pNnRC7RFr9LrmtrB6cc25Yz88WHJGVwK21KnkB95nlgE9PwkKcHFRAnw=="],
 
     "tinyglobby": ["tinyglobby@0.2.15", "", { "dependencies": { "fdir": "6.5.0", "picomatch": "4.0.3" } }, "sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ=="],
 
