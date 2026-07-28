@@ -37,3 +37,18 @@ export class Logger {
     console.log('---');
   }
 }
+
+export const toggleLog = () => {
+  console.log('Cycle logging');
+  switch (Logger.loggerLevel) {
+    case LoggerLevel.None:
+      Logger.loggerLevel = LoggerLevel.Info;
+      break;
+    case LoggerLevel.Info:
+      Logger.loggerLevel = LoggerLevel.Trace;
+      break;
+    default:
+      Logger.loggerLevel = LoggerLevel.None;
+  }
+  console.log(`Set to ${LoggerLevel[Logger.loggerLevel]}`);
+};
