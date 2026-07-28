@@ -7,6 +7,7 @@ import { Logger, LoggerLevel } from './Logger';
 import { getMousePos, getTouchPos, near } from './utility';
 import { Constants } from './constants';
 import { createSplineBezierManualArray } from './bezier';
+import { loadData, saveData } from './serialize';
 
 interface DrawConfig {
   color: Color;
@@ -64,6 +65,10 @@ const App: Component = () => {
       context.clearRect(0, 0, canvas.width, canvas.height);
     }
 
+    const savedPoints = loadData();
+    if (savedPoints.length) {
+      setPoints(savedPoints);
+    }
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     canvas = document.getElementById('main-canvas')! as HTMLCanvasElement;
     resizeCanvas();
@@ -236,6 +241,7 @@ const App: Component = () => {
 
   const resetButtonHandler = () => {
     setPoints([...standardPoints]);
+    saveData(points());
     drawSplines();
   };
 
@@ -253,12 +259,14 @@ const App: Component = () => {
         const current = points();
         current.splice(ii, 1);
         setPoints(current);
+        saveData(points());
         break;
       }
     }
 
     if (addNewPoint) {
       addPointHandler(pt);
+      saveData(points());
     }
     drawSplines();
   };
@@ -272,6 +280,7 @@ const App: Component = () => {
 
   const mouseUpHandler = () => {
     setPointIndex(-1);
+    saveData(points());
   };
 
   const mouseDownHandler = (data: MouseEvent) => {

@@ -2,7 +2,7 @@
 
 Copyright 2026 Steven Mycynek
 
-version: 000257
+version: 000260
 
 # A simple bezier app
 
