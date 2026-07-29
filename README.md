@@ -1,10 +1,10 @@
-## Bezler Box
+## Send-A-Spline
 
 Copyright 2026 Steven Mycynek
 
-version: 000318
+version: 000321
 
-# A simple bezier app
+# A simple bezier spline app
 
 In my spare time, I've tried to learn more about splines. So far, I have a simple bezier implementation. It's a single high-order polynomial curve -- I might build a composite curve of many quadratic or cubic beziers in the future.
 
