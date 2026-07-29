@@ -23,8 +23,12 @@ export async function base64ToUncompressed(text: string): Promise<string> {
   return new TextDecoder().decode(decompressedBuffer);
 }
 
-function getDataAsJSON(points: Point[]): string {
-  return JSON.stringify(points, null, 0);
+export function getDataAsJSON(points: Point[], compact: boolean = true): string {
+  if (compact) {
+    return JSON.stringify(points, null, 0);
+  } else {
+    return JSON.stringify(points, null, 2);
+  }
 }
 
 function getPointsFromJSON(data: string): Point[] {
@@ -39,7 +43,7 @@ function getPointsFromJSON(data: string): Point[] {
 const localStorageKey = 'pointData_v10';
 
 export async function saveData(points: Point[]) {
-  const data = getDataAsJSON(points);
+  const data = getDataAsJSON(points, true);
   const bData = await compressToBase64(data);
   try {
     localStorage.setItem(localStorageKey, bData);
@@ -60,7 +64,7 @@ export async function loadDataFromQueryString(queryString: string): Promise<Poin
 }
 export async function saveDataToQueryString(points: Point[]): Promise<string> {
   Logger.info('Get compressed data');
-  return compressToBase64(getDataAsJSON(points));
+  return compressToBase64(getDataAsJSON(points, true));
 }
 
 export async function loadData(): Promise<Point[]> {
