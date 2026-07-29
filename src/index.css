@@ -13,22 +13,59 @@ body {
   justify-content: center;
   align-items: center;
 }
+.narrow {
+  margin-top: 0;
+  margin-bottom: 0;
+}
 .cite {
   font-family: sans-serif;
   font-size: small;
-  margin-top: 20px;
+  margin-top: 0px;
 }
-.actionButton,
-.actionButtonWide {
+
+.button-link {
+  margin: 3px;
+  margin-left: 2px;
+  margin-right: 2px;
+  padding-left: 6px;
+  padding-right: 6px;
+
+  display: flex;
+  align-items: center;
+
+  border-style: solid;
   border-color: black;
   background-color: palegoldenrod;
   font-family: sans-serif;
-  font-size: medium;
-  margin: 3px;
-  margin-left: 5px;
-  margin-right: 5px;
+  font-size: small;
+  text-decoration: none; /* Removes the underline */
+  border-radius: 5px;
+  border-width: 1.5px;
   color: black;
-  height: 35px;
+  height: 28px;
+  &:disabled {
+    color: lightgrey;
+  }
+  &:hover {
+    font-weight: bold;
+  }
+}
+
+.button-link:hover {
+}
+
+.actionButton,
+.actionButtonWide {
+  border-width: 1.5px;
+  border-color: black;
+  background-color: palegoldenrod;
+  font-family: sans-serif;
+  font-size: small;
+  margin: 3px;
+  margin-left: 2px;
+  margin-right: 2px;
+  color: black;
+  height: 30px;
   border-radius: 5px;
   &:disabled {
     color: lightgrey;
@@ -39,5 +76,5 @@ body {
 }
 
 .actionButtonWide {
-  width: 275px;
+  width: 82px;
 }

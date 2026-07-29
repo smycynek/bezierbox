@@ -18,6 +18,7 @@ import { createSplineBezierManualArray } from './bezier';
 import {
   base64ToUncompressed,
   compressToBase64,
+  getDataAsJSON,
   loadData,
   loadDataFromQueryString,
   saveData,
@@ -177,6 +178,17 @@ const App: Component = () => {
     navigator.clipboard.write([clipboardItem]);
   };
 
+  const copyDataHandler = () => {
+    const sData = getDataAsJSON(points(), false);
+
+    const type = 'text/plain';
+    const clipboardItemData = {
+      [type]: sData,
+    };
+    const clipboardItem = new ClipboardItem(clipboardItemData);
+    navigator.clipboard.write([clipboardItem]);
+  };
+
   const doubleClickHandler = (data: MouseEvent) => {
     const ptOriginal = getMousePos(getCanvas(), data);
     const pt = cartesianAdjust(ptOriginal);
@@ -261,13 +273,14 @@ const App: Component = () => {
         <h1 title="Toggle Log" onClick={[toggleLog, null]}>
           Send a Spline!
         </h1>
-        <p>
+        <p title="An experiment combining polynomials and social media!">
           Hours of Fun. Drag points. Double-click/tap to add a point. Double-click/tap a point to
-          remove it (minimum 3 points). Text design to your friends!
+          remove it (minimum 3 points). Text designs to your friends!
         </p>
       </header>
       <header class={styles.header}>
         <canvas
+          title="Drag, double-click/tap here.  Like I said, hours of fun."
           onMouseDown={mouseDownHandler}
           onMouseMove={mouseMoveHandler}
           onTouchStart={touchStartHandler}
@@ -291,22 +304,40 @@ const App: Component = () => {
             </div>
           </Show>
           <div class="label">
-            <button onClick={resetButtonHandler} class="actionButtonWide">
+            <button
+              title="Reset points to default starting positions"
+              onClick={resetButtonHandler}
+              class="actionButtonWide"
+            >
               Reset
             </button>
-          </div>
-          <div class="label">
-            <button onClick={copyButtonHandler} class="actionButtonWide">
+            <button
+              title="Copy the URL, including the encoded curve point data, to the copy buffer to paste into email, text, etc."
+              onClick={copyButtonHandler}
+              class="actionButtonWide"
+            >
               Copy URL
             </button>
-          </div>
-          <div class="label">
-            <a href={textLink()} target="_blank" rel="noopener noreferrer">
-              Send to a friend (beta)
+            <button
+              title="Copy the plain-text point data to the copy buffer for pasting somewhere else"
+              onClick={copyDataHandler}
+              class="actionButtonWide"
+            >
+              Copy Data
+            </button>
+            <a
+              title="Send the URL, including the encoded curve point data, to an SMS text message"
+              href={textLink()}
+              class="button-link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Send text
             </a>
           </div>
           <div class="label cite">
             <a
+              title="More info here. Contact me with questions."
               href="https://github.com/smycynek/bezierbox"
               target="_blank"
               rel="noopener noreferrer"
@@ -314,7 +345,9 @@ const App: Component = () => {
               https://github.com/smycynek/bezierbox
             </a>
           </div>
-          <div class="label cite">v {version}</div>
+          <div title="I keep making small tweaks." class="label narrow cite">
+            v {version}
+          </div>
         </div>
       </header>
     </div>

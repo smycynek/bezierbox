@@ -42,8 +42,8 @@ span,
 li,
 ul {
   font-size: medium;
-  margin-left: 10px;
-  margin-right: 10px;
+  margin-left: 25px;
+  margin-right: 25px;
   margin-top: 3px;
   margin-bottom: 3px;
 }
@@ -148,7 +148,7 @@ input[type='checkbox']:checked::before {
 }
 
 .actionButtonWide {
-  width: 175px;
+  width: 70px;
 }
 
 .closeDialogButton {
