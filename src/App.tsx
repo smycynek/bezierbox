@@ -31,7 +31,7 @@ const App: Component = () => {
   const [showNormals, setShowNormals] = createSignal(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [height, setHeight] = createSignal(0);
-
+  const [showGrid, setShowGrid] = createSignal(true);
   const [pointIndex, setPointIndex] = createSignal(-1);
   const [textLink, setTextLink] = createSignal('https://stevenvictor.net/bezierbox');
   const standardPoints = [
@@ -100,31 +100,37 @@ const App: Component = () => {
   const drawSplines = () => {
     const ctx = getContext();
     ctx?.clearRect(0, 0, getCanvas().width, getCanvas().height);
-    drawGridAndAxes();
+    if (showGrid()) {
+      drawGridAndAxes();
+    }
 
     const spline = createSplineBezierManualArray(points());
 
     const config = getDrawConfig(Color.black, 1.0);
     config.solid = false;
 
-    // dashed line for controls
-    drawCurvePointCartSegments(points(), config);
+    if (showGrid()) {
+      // dashed line for controls
+      drawCurvePointCartSegments(points(), config);
+    }
 
     // actual curve
     drawCurvePointCartSegments(spline, getDrawConfig(Color.red, 2.0));
 
-    // control points
-    const scale = getScale();
-    points().forEach((p: Point) => {
-      drawPoint(
-        getCanvas().width / 2 + p.x * scale,
-        getCanvas().height / 2 - p.y * scale,
-        points().length < 4 ? Color.black : Color.blue,
-        true,
-        5,
-        2
-      );
-    });
+    if (showGrid()) {
+      // control points
+      const scale = getScale();
+      points().forEach((p: Point) => {
+        drawPoint(
+          getCanvas().width / 2 + p.x * scale,
+          getCanvas().height / 2 - p.y * scale,
+          points().length < 4 ? Color.black : Color.blue,
+          true,
+          5,
+          2
+        );
+      });
+    }
   };
 
   const pointIndexAdjust = (pos: Point) => {
@@ -159,6 +165,10 @@ const App: Component = () => {
     drawSplines();
   };
 
+  const showGridButtonHandler = () => {
+    setShowGrid(!showGrid());
+    drawSplines();
+  };
   const getTextUrl = async () => {
     const sData = encodeURIComponent(
       'https://stevenvictor.net/bezierbox/?data=' + (await saveDataToQueryString(points()))
@@ -334,6 +344,15 @@ const App: Component = () => {
             >
               Send text
             </a>
+          </div>
+          <div class="label">
+            <button
+              class="mini-action"
+              title="Toggle grid and controls"
+              onClick={showGridButtonHandler}
+            >
+              #
+            </button>
           </div>
           <div class="label cite">
             <a
