@@ -323,7 +323,7 @@ const App: Component = () => {
               onClick={copyDataHandler}
               class="actionButtonWide"
             >
-              Copy Data
+              Copy data
             </button>
             <a
               title="Send the URL, including the encoded curve point data, to an SMS text message"
