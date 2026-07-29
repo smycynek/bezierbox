@@ -213,6 +213,7 @@ const App: Component = () => {
   };
 
   const mouseUpHandler = async () => {
+    window.history.replaceState({}, '', 'https://stevenvictor.net/bezierbox/');
     setPointIndex(-1);
     saveData(points());
     const url = await getTextUrl();
