@@ -21,7 +21,7 @@ export const getDrawConfig = (
   return {
     color: color,
     canvas: getCanvas(),
-    scale: Constants.scale,
+    scale: getScale(),
     offset: offset,
     width: width,
     solid: true,
@@ -31,9 +31,12 @@ export const getDrawConfig = (
 export const getCanvas = () => document.getElementById('main-canvas')! as HTMLCanvasElement;
 export const getContext = () => getCanvas()?.getContext('2d');
 
+export const getScale = () => getCanvas().width / Constants.range;
+
 export const cartesianAdjust = (pt: Point): Point => {
-  const adjustedX = (-getCanvas().width / 2 + pt.x) / Constants.scale;
-  const adjustedY = (getCanvas().height / 2 - pt.y) / Constants.scale;
+  const scale = getScale();
+  const adjustedX = (-getCanvas().width / 2 + pt.x) / scale;
+  const adjustedY = (getCanvas().height / 2 - pt.y) / scale;
   return new Point(adjustedX, adjustedY);
 };
 
@@ -95,8 +98,9 @@ export const drawCurvePointCartSegments = (points: Point[], config: DrawConfig) 
 };
 
 export const drawGridAndAxes = () => {
-  for (let idx = -getCanvas().width / 2; idx <= getCanvas().width; idx += Constants.scale) {
-    for (let idy = -getCanvas().height / 2; idy < getCanvas().height; idy += Constants.scale) {
+  const scale = getScale();
+  for (let idx = -getCanvas().width / 2; idx <= getCanvas().width; idx += scale) {
+    for (let idy = -getCanvas().height / 2; idy < getCanvas().height; idy += scale) {
       drawGridPoint(idx, idy);
     }
   }

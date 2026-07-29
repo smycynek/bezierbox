@@ -11,9 +11,9 @@ import {
   getCanvas,
   getContext,
   getDrawConfig,
+  getScale,
 } from './drawUtil';
 import { getMousePos, getTouchPos, near } from './utility';
-import { Constants } from './constants';
 import { createSplineBezierManualArray } from './bezier';
 import {
   base64ToUncompressed,
@@ -113,10 +113,11 @@ const App: Component = () => {
     drawCurvePointCartSegments(spline, getDrawConfig(Color.red, 2.0));
 
     // control points
+    const scale = getScale();
     points().forEach((p: Point) => {
       drawPoint(
-        getCanvas().width / 2 + p.x * Constants.scale,
-        getCanvas().height / 2 - p.y * Constants.scale,
+        getCanvas().width / 2 + p.x * scale,
+        getCanvas().height / 2 - p.y * scale,
         points().length < 4 ? Color.black : Color.blue,
         true,
         5,
