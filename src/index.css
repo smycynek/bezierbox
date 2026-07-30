@@ -86,6 +86,8 @@ body {
 }
 
 .mini-action {
+  padding-left: 1px;
+  padding-right: 1px;
   border-style: solid;
   border-width: 1.5px;
   border-color: black;
