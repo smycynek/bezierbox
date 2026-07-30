@@ -2,7 +2,7 @@
 
 Copyright 2026 Steven Mycynek
 
-version: 000324
+version: 000325
 
 # A simple bezier spline app
 
