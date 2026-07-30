@@ -24,10 +24,6 @@ export function round2(v: number): number {
   return Math.round(v * 100) / 100;
 }
 
-export function round1(v: number): number {
-  return Math.round(v * 10) / 10;
-}
-
 export function near(p1: Point, p2: Point): boolean {
   return Math.sqrt(Math.pow(p2.y - p1.y, 2) + Math.pow(p2.x - p1.x, 2)) < 1;
 }
