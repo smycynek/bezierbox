@@ -17,6 +17,7 @@ body {
   margin-top: 0;
   margin-bottom: 0;
 }
+
 .cite {
   font-family: sans-serif;
   font-size: small;
@@ -52,14 +53,11 @@ body {
   }
 }
 
-.button-link:hover {
-}
-
 .image {
   border-style: none;
   background-color: rgba(0, 0, 0, 0);
 }
-.actionButton,
+
 .actionButtonWide {
   border-style: solid;
   border-width: 1.5px;
@@ -72,6 +70,7 @@ body {
   margin-right: 2px;
   color: black;
   height: 30px;
+  width: 82px;
   border-radius: 5px;
   &:disabled {
     color: lightgrey;
@@ -79,10 +78,6 @@ body {
   &:hover {
     font-weight: bold;
   }
-}
-
-.actionButtonWide {
-  width: 82px;
 }
 
 .mini-action {
