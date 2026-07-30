@@ -30,10 +30,8 @@
     "vite-plugin-solid": "^2.11.8"
   },
   "dependencies": {
-    "@corvu/dialog": "^0.2.4",
     "install": "^0.13.0",
     "memoize": "^11.0.0",
-    "solid-js": "^1.9.5",
-    "text-compress": "^2.0.6"
+    "solid-js": "^1.9.5"
   }
 }
