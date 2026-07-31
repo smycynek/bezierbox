@@ -16,8 +16,6 @@ import {
 import { getMousePos, getTouchPos, near } from './utility';
 import { createSplineBezierManualArray } from './bezier';
 import {
-  base64ToUncompressed,
-  compressToBase64,
   getDataAsJSON,
   loadData,
   loadDataFromQueryString,
@@ -25,6 +23,7 @@ import {
   saveDataToQueryString,
 } from './serialize';
 import { version } from './version';
+import { staticHostname } from './config';
 
 const App: Component = () => {
   const [normalControlEnabled] = createSignal(false);
@@ -33,7 +32,7 @@ const App: Component = () => {
   const [height, setHeight] = createSignal(0);
   const [showGrid, setShowGrid] = createSignal(true);
   const [pointIndex, setPointIndex] = createSignal(-1);
-  const [textLink, setTextLink] = createSignal('https://stevenvictor.net/bezierbox');
+  const [textLink, setTextLink] = createSignal('');
   const standardPoints = [
     new Point(-4, -4),
     new Point(-4, 4),
@@ -42,6 +41,7 @@ const App: Component = () => {
     new Point(4, 4),
   ];
 
+  const [hostname] = createSignal(staticHostname);
   const setShowNormalsW = (val: boolean) => {
     setShowNormals(val);
     drawSplines();
@@ -50,12 +50,6 @@ const App: Component = () => {
   const [points, setPoints] = createSignal([...standardPoints]);
 
   const init = async () => {
-    const initial = 'abc123ALWKENJ';
-    const comp = await compressToBase64(initial);
-    console.log(comp);
-    const rt = await base64ToUncompressed(comp);
-    console.log(rt);
-
     if (getContext()) {
       getContext()?.clearRect(0, 0, getCanvas().width, getCanvas().height);
     }
@@ -171,14 +165,13 @@ const App: Component = () => {
   };
   const getTextUrl = async () => {
     const sData = encodeURIComponent(
-      'https://stevenvictor.net/bezierbox/?data=' + (await saveDataToQueryString(points()))
+      `${hostname()}?data=` + (await saveDataToQueryString(points()))
     );
     return `sms:&body=${'Share%20a%20spline%21'}%20${sData}`;
   };
 
   const copyButtonHandler = async () => {
-    const sData =
-      'https://stevenvictor.net/bezierbox/?data=' + (await saveDataToQueryString(points()));
+    const sData = `${hostname()}?data=` + (await saveDataToQueryString(points()));
 
     const type = 'text/plain';
     const clipboardItemData = {
@@ -235,7 +228,7 @@ const App: Component = () => {
   };
 
   const mouseUpHandler = async () => {
-    window.history.replaceState({}, '', 'https://stevenvictor.net/bezierbox/');
+    window.history.replaceState({}, '', hostname());
     setPointIndex(-1);
     saveData(points());
     const url = await getTextUrl();
