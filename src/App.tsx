@@ -163,6 +163,8 @@ const App: Component = () => {
     setShowGrid(!showGrid());
     drawSplines();
   };
+
+  // DEMO_4_1 - Send url as text message
   const getTextUrl = async () => {
     const sData = encodeURIComponent(
       `${hostname()}?data=` + (await saveDataToQueryString(points()))
