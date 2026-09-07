@@ -9,6 +9,7 @@ function factorial(n: number): number {
 }
 const memFactorial = memoize(factorial);
 
+// DEMO_3_0 - n-degree Bezier
 export function createSplineBezierManualArray(controlPoints: Point[]): Point[] {
   // This creates a single high-degree bezier (5,6,7 degree, etc).
   // I might support a composite curve of many joined quadratic

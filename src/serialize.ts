@@ -53,6 +53,7 @@ export async function saveData(points: Point[]) {
   }
 }
 
+// DEMO_4_0 - Load query string
 export async function loadDataFromQueryString(queryString: string): Promise<Point[]> {
   const sData = queryString.substring(6);
   if (!sData) {
