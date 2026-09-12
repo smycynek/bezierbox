@@ -278,6 +278,9 @@ const App: Component = () => {
         <h1 title="Toggle Log" onClick={[toggleLog, null]}>
           Send a Spline!
         </h1>
+        <h2>
+          to a friend who is fine!
+        </h2>
         <p title="An experiment combining polynomials and social media!">
           Hours of Fun. Drag points. Double-click/tap to add a point. Double-click/tap a point to
           remove it (minimum 3 points). Text designs to your friends!
