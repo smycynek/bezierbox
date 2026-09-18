@@ -15,7 +15,11 @@ import {
   getScale,
 } from './drawUtil';
 import { getMousePos, getTouchPos, near } from './utility';
-import { createSplineBezierManualArray, createSplineBezierManualArrayDerivative } from './bezier';
+import {
+  calculateNormal,
+  createSplineBezierManualArray,
+  createSplineBezierManualArrayDerivative,
+} from './bezier';
 import {
   getDataAsJSON,
   loadData,
@@ -88,15 +92,6 @@ const App: Component = () => {
     setHeight(getCanvas().height);
   };
 
-  const calculateCurvature = (d1: Vector, d2: Vector): number => {
-    const speed = d1.magnitude(); // speed is length of first derivative
-    if (speed === 0) {
-      return 0;
-    }
-    // first cross second / (length of first cubed)
-    return d1.cross(d2).magnitude() / (speed * speed * speed);
-  };
-
   const drawSplines = () => {
     const ctx = getContext();
     ctx?.clearRect(0, 0, getCanvas().width, getCanvas().height);
@@ -105,8 +100,8 @@ const App: Component = () => {
     }
 
     const spline = createSplineBezierManualArray(points());
-    const d1 = createSplineBezierManualArrayDerivative(points());
-    const d2 = createSplineBezierManualArrayDerivative(d1.newControlPoints);
+    const splineD1 = createSplineBezierManualArrayDerivative(points());
+    const splineD2 = createSplineBezierManualArrayDerivative(splineD1.newControlPoints);
     const config = getDrawConfig(Color.black, 1.0);
     config.solid = false;
 
@@ -120,19 +115,11 @@ const App: Component = () => {
 
     if (showNormals()) {
       // normals with curvature
-      for (let idx = 0; idx < d1.points.length - 1; idx += 3) {
+      for (let idx = 0; idx < splineD1.points.length - 1; idx += 3) {
         const basePoint = spline[idx];
-        const d1Vector = new Vector(d1.points[idx].x, d1.points[idx].y);
-        const d2Vector = new Vector(d2.points[idx].x, d2.points[idx].y);
-        let normalVector = new Vector(d1Vector.y, -d1Vector.x);
-        const cross2d = d1Vector.x * d2Vector.y - d1Vector.y * d2Vector.x;
-        if (cross2d < 0) {
-          // if signed curvature is negative, we are concave down, so flip normal.
-          normalVector = new Vector(-d1Vector.y, d1Vector.x);
-        }
-        const curvature = calculateCurvature(d1Vector, d2Vector);
-        const normalScaled = normalVector.normalize().scale(curvature * 3);
-        const normalEnd = new Point(basePoint.x + normalScaled.x, basePoint.y + normalScaled.y);
+        const d1Vector = Vector.fromTriple(splineD1.points[idx]);
+        const d2Vector = Vector.fromTriple(splineD2.points[idx]);
+        const normalEnd = calculateNormal(basePoint, d1Vector, d2Vector);
         drawLine(basePoint, normalEnd, getDrawConfig(Color.blue, 1.0));
       }
     }
@@ -369,7 +356,11 @@ const App: Component = () => {
             >
               #
             </button>
-            <button onClick={showNormalsAndCurvatureHandler} class="mini-action">
+            <button
+              onClick={showNormalsAndCurvatureHandler}
+              title="Toggle normals and curvature"
+              class="mini-action"
+            >
               !
             </button>
           </div>

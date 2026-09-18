@@ -1,5 +1,6 @@
 import memoize from 'memoize';
 import { Point } from './Point';
+import { Vector } from './Vector';
 
 function factorial(n: number): number {
   if (n === 0 || n === 1) {
@@ -74,3 +75,25 @@ export function createSplineBezierManualArrayDerivative(controlPoints: Point[]):
     newControlPoints: derivedPoints,
   };
 }
+
+export const calculateCurvature = (d1: Vector, d2: Vector): number => {
+  const speed = d1.magnitude(); // speed is length of first derivative
+  if (speed === 0) {
+    return 0;
+  }
+  // first cross second / (length of first cubed)
+  return d1.cross(d2).magnitude() / (speed * speed * speed);
+};
+
+export const calculateNormal = (basePoint: Point, d1: Vector, d2: Vector): Point => {
+  let normalVector = new Vector(d1.y, -d1.x);
+  const cross2d = d1.x * d2.y - d1.y * d2.x;
+  if (cross2d < 0) {
+    // if signed curvature is negative, we are concave down, so flip normal.
+    normalVector = new Vector(-d1.y, d1.x);
+  }
+  const curvature = calculateCurvature(d1, d2);
+  const normalScaled = normalVector.normalize().scale(curvature * 3);
+  const normalEnd = new Point(basePoint.x + normalScaled.x, basePoint.y + normalScaled.y);
+  return normalEnd;
+};
