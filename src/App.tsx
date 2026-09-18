@@ -7,6 +7,7 @@ import {
   cartesianAdjust,
   drawCurvePointCartSegments,
   drawGridAndAxes,
+  drawLine,
   drawPoint,
   getCanvas,
   getContext,
@@ -14,7 +15,11 @@ import {
   getScale,
 } from './drawUtil';
 import { getMousePos, getTouchPos, near } from './utility';
-import { createSplineBezierManualArray } from './bezier';
+import {
+  createSplineBezierManualArray,
+  createSplineBezierManualArrayD1,
+  createSplineBezierManualArrayD2,
+} from './bezier';
 import {
   getDataAsJSON,
   loadData,
@@ -24,6 +29,7 @@ import {
 } from './serialize';
 import { version } from './version';
 import { staticHostname } from './config';
+import { Vector } from './Vector';
 
 const App: Component = () => {
   const [normalControlEnabled] = createSignal(false);
@@ -91,6 +97,15 @@ const App: Component = () => {
     setHeight(getCanvas().height);
   };
 
+  const calculateCurvature = (d1: Vector, d2: Vector): number => {
+    const speed = d1.magnitude(); // speed is length of first derivative
+    if (speed === 0) {
+      return 0;
+    }
+    // first cross second / (length of first cubed)
+    return d1.cross(d2).magnitude() / (speed * speed * speed);
+  };
+
   const drawSplines = () => {
     const ctx = getContext();
     ctx?.clearRect(0, 0, getCanvas().width, getCanvas().height);
@@ -99,7 +114,8 @@ const App: Component = () => {
     }
 
     const spline = createSplineBezierManualArray(points());
-
+    const splineD1 = createSplineBezierManualArrayD1(points());
+    const splineD2 = createSplineBezierManualArrayD2(points());
     const config = getDrawConfig(Color.black, 1.0);
     config.solid = false;
 
@@ -110,6 +126,24 @@ const App: Component = () => {
 
     // actual curve
     drawCurvePointCartSegments(spline, getDrawConfig(Color.red, 2.0));
+
+    // tangents
+    for (let idx = 0; idx < splineD1.length - 1; idx += 3) {
+      const basePoint = spline[idx];
+      const tangentVector = new Vector(splineD1[idx].x, splineD1[idx].y);
+      const d2Vector = new Vector(splineD2[idx].x, splineD2[idx].y);
+      let normalVector = new Vector(tangentVector.y, -tangentVector.x);
+      const cross2d = tangentVector.x * d2Vector.y - tangentVector.y * d2Vector.x;
+      if (cross2d < 0) {
+        // if signed curvature is negative, we are concave down, so flip normal.
+        normalVector = new Vector(-tangentVector.y, tangentVector.x);
+      }
+
+      const curvature = calculateCurvature(tangentVector, d2Vector);
+      const normalScaled = normalVector.normalize().scale(curvature * 10);
+      const normalEnd = new Point(basePoint.x + normalScaled.x, basePoint.y + normalScaled.y);
+      drawLine(basePoint, normalEnd, getDrawConfig(Color.blue, 1.0));
+    }
 
     if (showGrid()) {
       // control points
@@ -278,9 +312,7 @@ const App: Component = () => {
         <h1 title="Toggle Log" onClick={[toggleLog, null]}>
           Send a Spline!
         </h1>
-        <h2>
-          to a friend who is fine!
-        </h2>
+        <h2>to a friend who is fine!</h2>
         <p title="An experiment combining polynomials and social media!">
           Hours of Fun. Drag points. Double-click/tap to add a point. Double-click/tap a point to
           remove it (minimum 3 points). Text designs to your friends!

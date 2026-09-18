@@ -10,7 +10,10 @@ function factorial(n: number): number {
 const memFactorial = memoize(factorial);
 
 // DEMO_3_0 - n-degree Bezier
-export function createSplineBezierManualArray(controlPoints: Point[]): Point[] {
+export function createSplineBezierManualArray(
+  controlPoints: Point[],
+  spacing: number = 0.01
+): Point[] {
   // This creates a single high-degree bezier (5,6,7 degree, etc).
   // I might support a composite curve of many joined quadratic
   // or cubic beziers in the future.
@@ -44,9 +47,50 @@ export function createSplineBezierManualArray(controlPoints: Point[]): Point[] {
 
   // A continuous set of evaluations at t from values 0 to 1 yield a the curve.
   const bezierPoints: Point[] = [];
-  for (let t = 0; t <= 1; t += 0.01) {
+  for (let t = 0; t <= 1; t += spacing) {
     bezierPoints.push(evaluateAtT(t, controlPoints));
   }
 
   return bezierPoints;
+}
+
+export function createSplineBezierManualArrayD1(controlPoints: Point[]): Point[] {
+  const derivedPoints = [];
+
+  for (let i = 0; i < controlPoints.length - 1; i++) {
+    derivedPoints.push(
+      new Point(
+        controlPoints[i + 1].x - controlPoints[i].x,
+        controlPoints[i + 1].y - controlPoints[i].y
+      )
+    );
+  }
+
+  return createSplineBezierManualArray(derivedPoints, 0.01);
+}
+
+export function createSplineBezierManualArrayD2(controlPoints: Point[]): Point[] {
+  const derivedPoints1 = [];
+
+  for (let i = 0; i < controlPoints.length - 1; i++) {
+    derivedPoints1.push(
+      new Point(
+        controlPoints[i + 1].x - controlPoints[i].x,
+        controlPoints[i + 1].y - controlPoints[i].y
+      )
+    );
+  }
+
+  const derivedPoints2 = [];
+
+  for (let i = 0; i < derivedPoints1.length - 1; i++) {
+    derivedPoints2.push(
+      new Point(
+        derivedPoints1[i + 1].x - derivedPoints1[i].x,
+        derivedPoints1[i + 1].y - derivedPoints1[i].y
+      )
+    );
+  }
+
+  return createSplineBezierManualArray(derivedPoints2, 0.01);
 }
