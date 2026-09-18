@@ -1,4 +1,4 @@
-import { createSignal, onMount, Show, type Component } from 'solid-js';
+import { createSignal, onMount, type Component } from 'solid-js';
 import styles from './App.module.css';
 import { Point } from './Point';
 import { Color } from './color';
@@ -15,11 +15,7 @@ import {
   getScale,
 } from './drawUtil';
 import { getMousePos, getTouchPos, near } from './utility';
-import {
-  createSplineBezierManualArray,
-  createSplineBezierManualArrayD1,
-  createSplineBezierManualArrayD2,
-} from './bezier';
+import { createSplineBezierManualArray, createSplineBezierManualArrayDerivative } from './bezier';
 import {
   getDataAsJSON,
   loadData,
@@ -32,7 +28,6 @@ import { staticHostname } from './config';
 import { Vector } from './Vector';
 
 const App: Component = () => {
-  const [normalControlEnabled] = createSignal(false);
   const [showNormals, setShowNormals] = createSignal(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [height, setHeight] = createSignal(0);
@@ -48,10 +43,6 @@ const App: Component = () => {
   ];
 
   const [hostname] = createSignal(staticHostname);
-  const setShowNormalsW = (val: boolean) => {
-    setShowNormals(val);
-    drawSplines();
-  };
 
   const [points, setPoints] = createSignal([...standardPoints]);
 
@@ -114,8 +105,8 @@ const App: Component = () => {
     }
 
     const spline = createSplineBezierManualArray(points());
-    const splineD1 = createSplineBezierManualArrayD1(points());
-    const splineD2 = createSplineBezierManualArrayD2(points());
+    const d1 = createSplineBezierManualArrayDerivative(points());
+    const d2 = createSplineBezierManualArrayDerivative(d1.newControlPoints);
     const config = getDrawConfig(Color.black, 1.0);
     config.solid = false;
 
@@ -127,22 +118,23 @@ const App: Component = () => {
     // actual curve
     drawCurvePointCartSegments(spline, getDrawConfig(Color.red, 2.0));
 
-    // tangents
-    for (let idx = 0; idx < splineD1.length - 1; idx += 3) {
-      const basePoint = spline[idx];
-      const tangentVector = new Vector(splineD1[idx].x, splineD1[idx].y);
-      const d2Vector = new Vector(splineD2[idx].x, splineD2[idx].y);
-      let normalVector = new Vector(tangentVector.y, -tangentVector.x);
-      const cross2d = tangentVector.x * d2Vector.y - tangentVector.y * d2Vector.x;
-      if (cross2d < 0) {
-        // if signed curvature is negative, we are concave down, so flip normal.
-        normalVector = new Vector(-tangentVector.y, tangentVector.x);
+    if (showNormals()) {
+      // normals with curvature
+      for (let idx = 0; idx < d1.points.length - 1; idx += 3) {
+        const basePoint = spline[idx];
+        const d1Vector = new Vector(d1.points[idx].x, d1.points[idx].y);
+        const d2Vector = new Vector(d2.points[idx].x, d2.points[idx].y);
+        let normalVector = new Vector(d1Vector.y, -d1Vector.x);
+        const cross2d = d1Vector.x * d2Vector.y - d1Vector.y * d2Vector.x;
+        if (cross2d < 0) {
+          // if signed curvature is negative, we are concave down, so flip normal.
+          normalVector = new Vector(-d1Vector.y, d1Vector.x);
+        }
+        const curvature = calculateCurvature(d1Vector, d2Vector);
+        const normalScaled = normalVector.normalize().scale(curvature * 3);
+        const normalEnd = new Point(basePoint.x + normalScaled.x, basePoint.y + normalScaled.y);
+        drawLine(basePoint, normalEnd, getDrawConfig(Color.blue, 1.0));
       }
-
-      const curvature = calculateCurvature(tangentVector, d2Vector);
-      const normalScaled = normalVector.normalize().scale(curvature * 10);
-      const normalEnd = new Point(basePoint.x + normalScaled.x, basePoint.y + normalScaled.y);
-      drawLine(basePoint, normalEnd, getDrawConfig(Color.blue, 1.0));
     }
 
     if (showGrid()) {
@@ -195,6 +187,11 @@ const App: Component = () => {
 
   const showGridButtonHandler = () => {
     setShowGrid(!showGrid());
+    drawSplines();
+  };
+
+  const showNormalsAndCurvatureHandler = () => {
+    setShowNormals(!showNormals());
     drawSplines();
   };
 
@@ -332,17 +329,6 @@ const App: Component = () => {
           id="main-canvas"
         ></canvas>
         <div>
-          <Show when={normalControlEnabled()}>
-            <div class="label">
-              Show normals and curvature
-              <input
-                type="checkbox"
-                onChange={(e) => setShowNormalsW(e.currentTarget.checked)}
-                checked={showNormals()}
-                class="actionButtonWide"
-              ></input>
-            </div>
-          </Show>
           <div class="label">
             <button
               title="Reset points to default starting positions"
@@ -383,7 +369,11 @@ const App: Component = () => {
             >
               #
             </button>
+            <button onClick={showNormalsAndCurvatureHandler} class="mini-action">
+              !
+            </button>
           </div>
+
           <div class="label cite">
             <a
               title="More info here. Contact me with questions."

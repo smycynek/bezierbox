@@ -54,7 +54,10 @@ export function createSplineBezierManualArray(
   return bezierPoints;
 }
 
-export function createSplineBezierManualArrayD1(controlPoints: Point[]): Point[] {
+export function createSplineBezierManualArrayDerivative(controlPoints: Point[]): {
+  points: Point[];
+  newControlPoints: Point[];
+} {
   const derivedPoints = [];
 
   for (let i = 0; i < controlPoints.length - 1; i++) {
@@ -66,31 +69,8 @@ export function createSplineBezierManualArrayD1(controlPoints: Point[]): Point[]
     );
   }
 
-  return createSplineBezierManualArray(derivedPoints, 0.01);
-}
-
-export function createSplineBezierManualArrayD2(controlPoints: Point[]): Point[] {
-  const derivedPoints1 = [];
-
-  for (let i = 0; i < controlPoints.length - 1; i++) {
-    derivedPoints1.push(
-      new Point(
-        controlPoints[i + 1].x - controlPoints[i].x,
-        controlPoints[i + 1].y - controlPoints[i].y
-      )
-    );
-  }
-
-  const derivedPoints2 = [];
-
-  for (let i = 0; i < derivedPoints1.length - 1; i++) {
-    derivedPoints2.push(
-      new Point(
-        derivedPoints1[i + 1].x - derivedPoints1[i].x,
-        derivedPoints1[i + 1].y - derivedPoints1[i].y
-      )
-    );
-  }
-
-  return createSplineBezierManualArray(derivedPoints2, 0.01);
+  return {
+    points: createSplineBezierManualArray(derivedPoints, 0.01),
+    newControlPoints: derivedPoints,
+  };
 }
