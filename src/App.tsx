@@ -1,4 +1,4 @@
-import { createSignal, onMount, Show, type Component } from 'solid-js';
+import { createSignal, onMount, type Component } from 'solid-js';
 import styles from './App.module.css';
 import { Point } from './Point';
 import { Color } from './color';
@@ -7,6 +7,7 @@ import {
   cartesianAdjust,
   drawCurvePointCartSegments,
   drawGridAndAxes,
+  drawLine,
   drawPoint,
   getCanvas,
   getContext,
@@ -14,7 +15,11 @@ import {
   getScale,
 } from './drawUtil';
 import { getMousePos, getTouchPos, near } from './utility';
-import { createSplineBezierManualArray } from './bezier';
+import {
+  calculateNormal,
+  createSplineBezierManualArray,
+  createSplineBezierManualArrayDerivative,
+} from './bezier';
 import {
   getDataAsJSON,
   loadData,
@@ -24,9 +29,9 @@ import {
 } from './serialize';
 import { version } from './version';
 import { staticHostname } from './config';
+import { Vector } from './Vector';
 
 const App: Component = () => {
-  const [normalControlEnabled] = createSignal(false);
   const [showNormals, setShowNormals] = createSignal(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [height, setHeight] = createSignal(0);
@@ -42,10 +47,6 @@ const App: Component = () => {
   ];
 
   const [hostname] = createSignal(staticHostname);
-  const setShowNormalsW = (val: boolean) => {
-    setShowNormals(val);
-    drawSplines();
-  };
 
   const [points, setPoints] = createSignal([...standardPoints]);
 
@@ -99,7 +100,8 @@ const App: Component = () => {
     }
 
     const spline = createSplineBezierManualArray(points());
-
+    const splineD1 = createSplineBezierManualArrayDerivative(points());
+    const splineD2 = createSplineBezierManualArrayDerivative(splineD1.newControlPoints);
     const config = getDrawConfig(Color.black, 1.0);
     config.solid = false;
 
@@ -110,6 +112,17 @@ const App: Component = () => {
 
     // actual curve
     drawCurvePointCartSegments(spline, getDrawConfig(Color.red, 2.0));
+
+    if (showNormals()) {
+      // normals with curvature
+      for (let idx = 0; idx < splineD1.points.length - 1; idx += 3) {
+        const basePoint = spline[idx];
+        const d1Vector = Vector.fromTriple(splineD1.points[idx]);
+        const d2Vector = Vector.fromTriple(splineD2.points[idx]);
+        const normalEnd = calculateNormal(basePoint, d1Vector, d2Vector);
+        drawLine(basePoint, normalEnd, getDrawConfig(Color.blue, 1.0));
+      }
+    }
 
     if (showGrid()) {
       // control points
@@ -161,6 +174,11 @@ const App: Component = () => {
 
   const showGridButtonHandler = () => {
     setShowGrid(!showGrid());
+    drawSplines();
+  };
+
+  const showNormalsAndCurvatureHandler = () => {
+    setShowNormals(!showNormals());
     drawSplines();
   };
 
@@ -278,9 +296,7 @@ const App: Component = () => {
         <h1 title="Toggle Log" onClick={[toggleLog, null]}>
           Send a Spline!
         </h1>
-        <h2>
-          to a friend who is fine!
-        </h2>
+        <h2>to a friend who is fine!</h2>
         <p title="An experiment combining polynomials and social media!">
           Hours of Fun. Drag points. Double-click/tap to add a point. Double-click/tap a point to
           remove it (minimum 3 points). Text designs to your friends!
@@ -300,17 +316,6 @@ const App: Component = () => {
           id="main-canvas"
         ></canvas>
         <div>
-          <Show when={normalControlEnabled()}>
-            <div class="label">
-              Show normals and curvature
-              <input
-                type="checkbox"
-                onChange={(e) => setShowNormalsW(e.currentTarget.checked)}
-                checked={showNormals()}
-                class="actionButtonWide"
-              ></input>
-            </div>
-          </Show>
           <div class="label">
             <button
               title="Reset points to default starting positions"
@@ -351,7 +356,15 @@ const App: Component = () => {
             >
               #
             </button>
+            <button
+              onClick={showNormalsAndCurvatureHandler}
+              title="Toggle normals and curvature"
+              class="mini-action"
+            >
+              !
+            </button>
           </div>
+
           <div class="label cite">
             <a
               title="More info here. Contact me with questions."
